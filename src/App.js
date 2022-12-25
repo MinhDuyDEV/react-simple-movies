@@ -5,6 +5,7 @@ import Main from "./components/layout/Main";
 import HomePage from "./pages/HomePage";
 import Banner from "./components/banner/Banner";
 import MoviePage from "./pages/MoviePage";
+import MovieDetailsPage from "./pages/MovieDetailsPage";
 
 const App = () => {
   return (
@@ -21,6 +22,10 @@ const App = () => {
             }
           ></Route>
           <Route path="/movies" element={<MoviePage></MoviePage>}></Route>
+          <Route
+            path="/movies/:movieId"
+            element={<MovieDetailsPage></MovieDetailsPage>}
+          ></Route>
         </Route>
       </Routes>
     </Fragment>
