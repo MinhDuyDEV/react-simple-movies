@@ -4,7 +4,7 @@ const MovieCard = ({ item }) => {
   if (!item) return null;
   const { title, vote_average, release_date, poster_path } = item;
   return (
-    <div className="flex flex-col h-full p-3 rounded-lg select-none movie-card bg-slate-800">
+    <div className="flex flex-col h-full p-3 text-white rounded-lg select-none movie-card bg-slate-800">
       <div className="flex flex-col flex-1">
         <img
           src={`https://image.tmdb.org/t/p/w500/${poster_path}`}
