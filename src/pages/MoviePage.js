@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import useSWR from "swr";
 import MovieCard from "../components/movie/MovieCard";
-import { fetcher } from "../config";
+import { fetcher, tmdbAPI } from "../config";
 import useDebounce from "../hooks/useDebounce";
 import ReactPaginate from "react-paginate";
 
@@ -11,9 +11,10 @@ const MoviePage = () => {
   const [itemOffset, setItemOffset] = useState(0);
   const [nextPage, setNextPage] = useState(1);
   const [filter, setFilter] = useState("");
-  const [url, setUrl] = useState(
-    `https://api.themoviedb.org/3/movie/popular?api_key=064c0013dc4bf2e81cfdfaa8639df094&page=${nextPage}`
-  );
+  const [url, setUrl] = useState(tmdbAPI.getMovieList("popular", nextPage));
+  // const [url, setUrl] = useState(
+  //   `https://api.themoviedb.org/3/movie/popular?api_key=064c0013dc4bf2e81cfdfaa8639df094&page=${nextPage}`
+  // );
   const filterDebounce = useDebounce(filter, 500);
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
@@ -26,9 +27,7 @@ const MoviePage = () => {
         `https://api.themoviedb.org/3/search/movie?api_key=064c0013dc4bf2e81cfdfaa8639df094&query=${filterDebounce}&page=${nextPage}`
       );
     } else {
-      setUrl(
-        `https://api.themoviedb.org/3/movie/popular?api_key=064c0013dc4bf2e81cfdfaa8639df094&&page=${nextPage}`
-      );
+      setUrl(tmdbAPI.getMovieList("popular", nextPage));
     }
   }, [filterDebounce, nextPage]);
   const movies = data?.results || [];
