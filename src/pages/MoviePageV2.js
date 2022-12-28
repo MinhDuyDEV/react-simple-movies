@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import useSWR from "swr";
 import MovieCard, { MovieCardSkeleton } from "../components/movie/MovieCard";
 import { fetcher, tmdbAPI } from "../config";
 import useDebounce from "../hooks/useDebounce";
-import ReactPaginate from "react-paginate";
 import { v4 } from "uuid";
+import Button from "components/button/Button";
+import useSWRInfinite from "swr/infinite";
 
 const itemsPerPage = 20;
 const MoviePage = () => {
@@ -17,8 +17,15 @@ const MoviePage = () => {
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
   };
-  const { data, error } = useSWR(url, fetcher);
+  const { data, error, size, setSize } = useSWRInfinite(
+    (index) => url.replace("page=1", `page=${index + 1}`),
+    fetcher
+  );
+  const movies = data ? data.reduce((a, b) => a.concat(b.results), []) : [];
   const loading = !data && !error;
+  const isEmpty = data?.[0]?.results.length === 0;
+  const isReachingEnd =
+    isEmpty || (data && data[data.length - 1]?.results.length < itemsPerPage);
   useEffect(() => {
     if (filterDebounce) {
       setUrl(`${tmdbAPI.getMovieSearch(filterDebounce, nextPage)}`);
@@ -26,7 +33,6 @@ const MoviePage = () => {
       setUrl(tmdbAPI.getMovieList("popular", nextPage));
     }
   }, [filterDebounce, nextPage]);
-  const movies = data?.results || [];
   useEffect(() => {
     if (!data || !data.total_results) return;
     setPageCount(Math.ceil(data.total_results / itemsPerPage));
@@ -64,14 +70,11 @@ const MoviePage = () => {
           </svg>
         </button>
       </div>
-      {/* {loading && (
-        <div className="w-10 h-10 mx-auto transition-all border-4 border-t-4 rounded-full animate-spin border-t-transparent border-b-transparent border-primary"></div>
-      )} */}
       {loading && (
         <div className="grid grid-cols-4 gap-10">
-          {new Array(itemsPerPage).fill(0).map(() => (
-            <MovieCardSkeleton key={v4()}></MovieCardSkeleton>
-          ))}
+          {new Array(itemsPerPage).fill(0).map(() => {
+            <MovieCardSkeleton key={v4()}></MovieCardSkeleton>;
+          })}
         </div>
       )}
       <div className="grid grid-cols-4 gap-10">
@@ -81,17 +84,16 @@ const MoviePage = () => {
             <MovieCard key={item.id} item={item}></MovieCard>
           ))}
       </div>
-      <div className="mt-10">
-        <ReactPaginate
-          breakLabel="..."
-          nextLabel="next >"
-          onPageChange={handlePageClick}
-          pageRangeDisplayed={5}
-          pageCount={pageCount}
-          previousLabel="< previous"
-          renderOnZeroPageCount={null}
-          className="pagination"
-        />
+      <div className="mt-10 text-center">
+        <Button
+          className={`w-auto ${
+            isReachingEnd ? "bg-slate-300 text-red-500" : ""
+          }`}
+          onClick={() => (isReachingEnd ? {} : setSize(size + 1))}
+          disabled={isReachingEnd}
+        >
+          Load more
+        </Button>
       </div>
     </div>
   );
